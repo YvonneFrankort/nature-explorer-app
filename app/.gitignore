@@ -1,0 +1,45 @@
+/build
+# Gradle files
+.gradle/
+build/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Local configuration
+local.properties
+
+# IntelliJ / Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Keystore files (VERY IMPORTANT)
+*.jks
+*.keystore
+
+# APK / AAB / APKS outputs
+*.apk
+*.apks
+*.aab
+
+# Log files
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Kotlin build cache
+.kotlinc/
+
+# Android specific
+captures/
+.externalNativeBuild/
+.cxx/
+
+bundletool.jar
+
+google-services.json
+
+
