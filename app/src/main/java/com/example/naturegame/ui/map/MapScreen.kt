@@ -3,15 +3,18 @@ package com.example.naturegame.ui.map
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.naturegame.data.local.entity.NatureSpot
+import com.example.naturegame.utils.getCategoryColorHex
+import com.example.naturegame.utils.getTintedDefaultMarker
+import com.example.naturegame.utils.scaleDrawable
 import com.example.naturegame.viewmodel.MapViewModel
-import com.example.naturegame.viewmodel.WalkViewModel
 import com.example.naturegame.viewmodel.ProfileViewModel
+import com.example.naturegame.viewmodel.WalkViewModel
 import com.example.naturegame.viewmodel.toFormattedDate
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -19,18 +22,11 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.core.content.ContextCompat
-import com.example.naturegame.utils.getCategoryColorHex
-import com.example.naturegame.utils.getTintedDefaultMarker
-import com.example.naturegame.utils.scaleDrawable
-import com.example.naturegame.data.local.entity.NatureSpot
-import com.example.naturegame.R
 
 @Composable
 fun MapScreen(
     mapViewModel: MapViewModel = hiltViewModel(),
-    walkViewModel: WalkViewModel = viewModel(),
+    walkViewModel: WalkViewModel = hiltViewModel(),
     profileViewModel: ProfileViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -45,7 +41,7 @@ fun MapScreen(
     LaunchedEffect(isWalking) {
         if (isWalking) {
             mapViewModel.resetRoute()
-            mapViewModel.startTracking()
+            mapViewModel.startTracking()   // matches clean MapViewModel
         } else {
             mapViewModel.stopTracking()
         }
@@ -53,26 +49,19 @@ fun MapScreen(
 
     val defaultPosition = GeoPoint(65.0121, 25.4651)
 
-    LaunchedEffect(Unit) {
-        Configuration.getInstance().userAgentValue = context.packageName
-    }
-
     Column(modifier = Modifier.fillMaxSize()) {
 
         Box(modifier = Modifier.weight(1f)) {
 
+            Configuration.getInstance().load(
+                context,
+                context.getSharedPreferences("osmdroid", 0)
+            )
+            Configuration.getInstance().userAgentValue = context.packageName
+
             val mapViewState = remember { MapView(context) }
             var selectedSpot by remember { mutableStateOf<NatureSpot?>(null) }
-
-            LaunchedEffect(natureSpots) {
-                natureSpots.lastOrNull()?.let { spot ->
-                    mapViewState.controller.animateTo(
-                        GeoPoint(spot.latitude, spot.longitude),
-                        17.0,
-                        1000L
-                    )
-                }
-            }
+            var hasCentered by remember { mutableStateOf(false) }
 
             DisposableEffect(Unit) {
                 mapViewState.setTileSource(TileSourceFactory.MAPNIK)
@@ -85,7 +74,6 @@ fun MapScreen(
                 onDispose { mapViewState.onDetach() }
             }
 
-            // ⭐ NO KEY() — this restores the original working behavior
             AndroidView(
                 factory = { mapViewState },
                 modifier = Modifier.fillMaxSize(),
@@ -93,7 +81,7 @@ fun MapScreen(
 
                     mapView.overlays.clear()
 
-                    // Draw route polyline
+                    // Route polyline
                     if (routePoints.size >= 2) {
                         val polyline = Polyline().apply {
                             setPoints(routePoints)
@@ -103,7 +91,7 @@ fun MapScreen(
                         mapView.overlays.add(polyline)
                     }
 
-                    // Draw NatureSpot markers
+                    // NatureSpot markers
                     natureSpots.forEach { spot ->
                         val marker = Marker(mapView).apply {
                             position = GeoPoint(spot.latitude, spot.longitude)
@@ -116,7 +104,9 @@ fun MapScreen(
                             val tintedIcon = getTintedDefaultMarker(context, colorHex)
 
                             val safeIcon = tintedIcon
-                                ?: mapView.context.getDrawable(org.osmdroid.library.R.drawable.marker_default)!!
+                                ?: mapView.context.getDrawable(
+                                    org.osmdroid.library.R.drawable.marker_default
+                                )!!
 
                             val zoom = mapView.zoomLevelDouble.toFloat()
                             val scale = (zoom / 5f).coerceIn(1.5f, 6f)
@@ -131,13 +121,11 @@ fun MapScreen(
                         mapView.overlays.add(marker)
                     }
 
-                    // ⭐ Old behavior restored — this worked before
-                    currentLocation?.let { loc ->
-                        mapView.controller.animateTo(
-                            GeoPoint(loc.latitude, loc.longitude),
-                            16.0,
-                            1000L
-                        )
+                    val loc = currentLocation
+                    if (!hasCentered && loc != null) {
+                        val startPoint = GeoPoint(loc.latitude, loc.longitude)
+                        mapView.controller.setCenter(startPoint)
+                        hasCentered = true
                     }
 
                     mapView.invalidate()

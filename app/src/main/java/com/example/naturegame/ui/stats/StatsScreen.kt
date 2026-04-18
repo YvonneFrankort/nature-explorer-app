@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.naturegame.viewmodel.StatsViewModel
 import com.example.naturegame.viewmodel.toFormattedDate
-import com.example.naturegame.viewmodel.formatDuration
 import com.example.naturegame.data.local.entity.WalkSession
 
 @Composable
@@ -113,3 +112,16 @@ fun formatDistance(meters: Float): String {
         "%.1f km".format(meters / 1000f)
     }
 }
+
+fun formatDuration(startTime: Long, endTime: Long = System.currentTimeMillis()): String {
+    val seconds = (endTime - startTime) / 1000
+    val minutes = seconds / 60
+    val hours = minutes / 60
+
+    return when {
+        hours > 0 -> "${hours}h ${minutes % 60}min"
+        minutes > 0 -> "${minutes}min ${seconds % 60}s"
+        else -> "${seconds}s"
+    }
+}
+

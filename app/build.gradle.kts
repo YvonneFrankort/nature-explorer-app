@@ -29,18 +29,8 @@ android {
         versionName = "1.0"
     }
 
-    signingConfigs {
-        create("release") {
-            storeFile = file(localProperties.getProperty("KEYSTORE_PATH") ?: "")
-            storePassword = localProperties.getProperty("KEYSTORE_PASSWORD") ?: ""
-            keyAlias = localProperties.getProperty("KEY_ALIAS") ?: ""
-            keyPassword = localProperties.getProperty("KEY_PASSWORD") ?: ""
-        }
-    }
-
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

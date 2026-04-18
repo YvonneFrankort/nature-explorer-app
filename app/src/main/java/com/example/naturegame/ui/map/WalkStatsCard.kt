@@ -9,8 +9,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.naturegame.viewmodel.WalkViewModel
 import com.example.naturegame.viewmodel.ProfileViewModel
-import com.example.naturegame.viewmodel.formatDuration
-import com.example.naturegame.viewmodel.formatDistance
+import com.example.naturegame.ui.stats.formatDuration
+import com.example.naturegame.ui.stats.formatDistance
 
 @Composable
 fun WalkStatsCard(
@@ -48,11 +48,17 @@ fun WalkStatsCard(
                         Text("steps")
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("${s.distanceMeters} m", style = MaterialTheme.typography.headlineMedium)
+                        Text(
+                            formatDistance(s.distanceMeters),
+                            style = MaterialTheme.typography.headlineMedium
+                        )
                         Text("distance")
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(formatDuration(s.startTime), style = MaterialTheme.typography.headlineMedium)
+                        Text(
+                            formatDuration(s.startTime, s.endTime ?: System.currentTimeMillis()),
+                            style = MaterialTheme.typography.headlineMedium
+                        )
                         Text("time")
                     }
                 }
@@ -72,8 +78,8 @@ fun WalkStatsCard(
                     OutlinedButton(
                         onClick = {
                             viewModel.stopWalk { session ->
+                                // callback if needed
                             }
-
                         },
                         modifier = Modifier.weight(1f)
                     ) { Text("Stop") }

@@ -23,8 +23,8 @@ class WalkViewModel(application: Application) : AndroidViewModel(application) {
     private val _isWalking = MutableStateFlow(false)
     val isWalking: StateFlow<Boolean> = _isWalking.asStateFlow()
 
-    // NEW: store the starting step count
     private var stepsAtStart: Int? = null
+    private var stepsDuringWalk: Int = 0
 
     fun startWalk() {
         if (_isWalking.value) return
@@ -33,34 +33,27 @@ class WalkViewModel(application: Application) : AndroidViewModel(application) {
         _currentSession.value = session
         _isWalking.value = true
 
-        // Insert session immediately
+        // Save only the start of the session
         viewModelScope.launch {
             db.walkSessionDao().insert(session)
         }
 
-        // Start step counting with total step values
         stepManager.startStepCounting { totalSteps ->
 
-            // First reading becomes the baseline
             if (stepsAtStart == null) {
                 stepsAtStart = totalSteps
             }
 
-            val start = stepsAtStart ?: totalSteps
+            val start = stepsAtStart ?: return@startStepCounting
             val stepsDuringWalk = totalSteps - start
 
-            _currentSession.update { current ->
-                current?.copy(
+            viewModelScope.launch {
+                val current = _currentSession.value ?: return@launch
+
+                _currentSession.value = current.copy(
                     stepCount = stepsDuringWalk,
                     distanceMeters = stepsDuringWalk * StepCounterManager.STEP_LENGTH_METERS
                 )
-            }
-
-            // Save updates to DB
-            viewModelScope.launch {
-                _currentSession.value?.let { updated ->
-                    db.walkSessionDao().update(updated)
-                }
             }
         }
     }
@@ -69,7 +62,6 @@ class WalkViewModel(application: Application) : AndroidViewModel(application) {
         stepManager.stopStepCounting()
         _isWalking.value = false
 
-        // Reset baseline for next walk
         stepsAtStart = null
 
         _currentSession.update { it?.copy(
@@ -77,6 +69,7 @@ class WalkViewModel(application: Application) : AndroidViewModel(application) {
             isActive = false
         )}
 
+        // Save final session only once
         viewModelScope.launch {
             _currentSession.value?.let { session ->
                 db.walkSessionDao().update(session)
@@ -89,25 +82,5 @@ class WalkViewModel(application: Application) : AndroidViewModel(application) {
     override fun onCleared() {
         super.onCleared()
         stepManager.stopAll()
-    }
-}
-
-fun formatDistance(meters: Float): String {
-    return if (meters < 1000f) {
-        "${meters.toInt()} m"
-    } else {
-        "${"%.1f".format(meters / 1000f)} km"
-    }
-}
-
-fun formatDuration(startTime: Long, endTime: Long = System.currentTimeMillis()): String {
-    val seconds = (endTime - startTime) / 1000
-    val minutes = seconds / 60
-    val hours = minutes / 60
-
-    return when {
-        hours > 0 -> "${hours}h ${minutes % 60}min"
-        minutes > 0 -> "${minutes}min ${seconds % 60}s"
-        else -> "${seconds}s"
     }
 }

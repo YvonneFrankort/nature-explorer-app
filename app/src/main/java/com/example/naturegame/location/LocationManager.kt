@@ -32,26 +32,43 @@ class LocationManager(private val context: Context) {
             return
         }
 
-        val request: LocationRequest = LocationRequest.Builder(
+        val request = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
-            2000L // update every 2 seconds
+            500L // update every 0.5 seconds
         )
-            .setMinUpdateDistanceMeters(1f)
+            .setMinUpdateIntervalMillis(250L)
+            .setMinUpdateDistanceMeters(0f)
+            .setMaxUpdateDelayMillis(500L)
             .build()
 
-        callback = (object : LocationCallback() {
+        callback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
                 val loc = result.lastLocation ?: return
 
                 _currentLocation.value = loc
 
-                val point = GeoPoint(loc.latitude, loc.longitude)
-                _routePoints.value = _routePoints.value + point
+                // Only add polyline points when accuracy is good
+                if (loc.accuracy <= 50f || _routePoints.value.isEmpty()) {
+
+                    val last = _routePoints.value.lastOrNull()
+                    if (last != null) {
+                        val results = FloatArray(1)
+                        Location.distanceBetween(
+                            last.latitude, last.longitude,
+                            loc.latitude, loc.longitude,
+                            results
+                        )
+
+                        // Ignore tiny jitter under 1 meter
+                        if (results[0] < 1f) return
+                    }
+
+                    val point = GeoPoint(loc.latitude, loc.longitude)
+                    _routePoints.value = _routePoints.value + point
+                }
             }
-        }) as LocationCallback
+        }
 
-
-        println("DEBUG: Requesting location updates…")
 
         fusedClient.requestLocationUpdates(
             request,
