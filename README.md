@@ -44,25 +44,25 @@ Users can track their walks, capture photos, identify species, and store observa
 
 ## 🗺️ Screenshot
 **Map Screen**<br>
-<img width="300" height="2048" alt="Map_Screen" src="https://github.com/user-attachments/assets/467829fc-2843-49cb-b737-d0a940c01017" />
+<img width="300" alt="Map_Screen" src="https://github.com/user-attachments/assets/467829fc-2843-49cb-b737-d0a940c01017" />
 
 **Marker and Polyline**<br>
-<img width="300" height="2400" alt="Marker_And_Polyline" src="https://github.com/user-attachments/assets/7a81d728-14bd-447b-a9ae-003c638fca04" />
+<img width="300" alt="Marker_And_Polyline" src="https://github.com/user-attachments/assets/7a81d728-14bd-447b-a9ae-003c638fca04" />
 
 **Marker Note**<br>
-<img width="300" height="2048" alt="Marker_Note" src="https://github.com/user-attachments/assets/e972ffd8-98ee-4414-a428-c2a49af192f8" />
+<img width="300" alt="Marker_Note" src="https://github.com/user-attachments/assets/e972ffd8-98ee-4414-a428-c2a49af192f8" />
 
 **Camera Screen**<br>
-<img width="300" height="2048" alt="Camera_Screen" src="https://github.com/user-attachments/assets/076dd4e4-e491-4986-b730-662c2c7e69ab" />
+<img width="300" alt="Camera_Screen" src="https://github.com/user-attachments/assets/076dd4e4-e491-4986-b730-662c2c7e69ab" />
 
 **Discover Screen**<br>
-<img width="300" height="2048" alt="Discovery_Screen" src="https://github.com/user-attachments/assets/6389f9d0-7c1c-43c0-8a05-2b3eb3a6998b" />
+<img width="300" alt="Discovery_Screen" src="https://github.com/user-attachments/assets/6389f9d0-7c1c-43c0-8a05-2b3eb3a6998b" />
 
 **Stats Screen**<br>
-<img width="300" height="2048" alt="Stats_Screen" src="https://github.com/user-attachments/assets/2eaf1f14-843e-4609-a57e-3b2f6977a9ef" />
+<img width="300" alt="Stats_Screen" src="https://github.com/user-attachments/assets/2eaf1f14-843e-4609-a57e-3b2f6977a9ef" />
 
 **Profile Screen**<br>
-<img width="300" height="2048" alt="Profile_Screen" src="https://github.com/user-attachments/assets/4191295e-69c2-4bcb-a2cb-2d2776eb4a37" />
+<img width="300" alt="Profile_Screen" src="https://github.com/user-attachments/assets/4191295e-69c2-4bcb-a2cb-2d2776eb4a37" />
 
 ---
 
