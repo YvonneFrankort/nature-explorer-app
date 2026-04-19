@@ -6,37 +6,58 @@ import androidx.lifecycle.viewModelScope
 import com.example.naturegame.data.local.AppDatabase
 import com.example.naturegame.data.repository.WalkRepository
 import com.example.naturegame.data.local.entity.WalkSession
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class StatsViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class StatsViewModel @Inject constructor(
+    application: Application
+) : AndroidViewModel(application) {
 
     private val db = AppDatabase.getDatabase(application)
     private val repository = WalkRepository(db.walkSessionDao())
 
-    private val _sessions = MutableStateFlow<List<WalkSession>>(emptyList())
-    val sessions: StateFlow<List<WalkSession>> = _sessions.asStateFlow()
+    // All sessions as a StateFlow
+    val sessions: StateFlow<List<WalkSession>> =
+        repository.getAllSessions()
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5000),
+                emptyList()
+            )
 
-    init {
-        loadSessions()
-    }
+    // ⭐ Reactive summary values (THIS FIXES YOUR BUG)
+    val totalSteps: StateFlow<Int> =
+        sessions.map { list ->
+            list.sumOf { it.stepCount }
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            0
+        )
 
-    private fun loadSessions() {
-        viewModelScope.launch {
-            repository.getAllSessions().collect { list ->
-                _sessions.value = list
-            }
-        }
-    }
+    val totalDistance: StateFlow<Float> =
+        sessions.map { list ->
+            list.sumOf { it.distanceMeters.toDouble() }.toFloat()
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            0f
+        )
 
-    fun totalSteps(): Int =
-        _sessions.value.sumOf { it.stepCount }
-
-    fun totalDistance(): Float =
-        _sessions.value.sumOf { it.distanceMeters.toDouble() }.toFloat()
-
-    fun totalWalks(): Int =
-        _sessions.value.size
+    val totalWalks: StateFlow<Int> =
+        sessions.map { list ->
+            list.size
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            0
+        )
 }

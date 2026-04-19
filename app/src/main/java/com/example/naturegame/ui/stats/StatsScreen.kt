@@ -10,12 +10,16 @@ import androidx.compose.ui.unit.dp
 import com.example.naturegame.viewmodel.StatsViewModel
 import com.example.naturegame.viewmodel.toFormattedDate
 import com.example.naturegame.data.local.entity.WalkSession
-
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @Composable
 fun StatsScreen(
     statsViewModel: StatsViewModel
 ) {
-    val sessions by statsViewModel.sessions.collectAsState()
+    val sessions by statsViewModel.sessions.collectAsStateWithLifecycle()
+    val totalSteps by statsViewModel.totalSteps.collectAsStateWithLifecycle()
+    val totalDistance by statsViewModel.totalDistance.collectAsStateWithLifecycle()
+    val totalWalks by statsViewModel.totalWalks.collectAsStateWithLifecycle()
+
 
     Column(
         modifier = Modifier
@@ -32,17 +36,17 @@ fun StatsScreen(
 
         SummaryCard(
             title = "Total Steps",
-            value = statsViewModel.totalSteps().toString()
+            value = totalSteps.toString()
         )
 
         SummaryCard(
             title = "Total Distance",
-            value = formatDistance(statsViewModel.totalDistance())
+            value = formatDistance(totalDistance)
         )
 
         SummaryCard(
             title = "Total Walks",
-            value = statsViewModel.totalWalks().toString()
+            value = totalWalks.toString()
         )
 
         Spacer(modifier = Modifier.height(24.dp))
