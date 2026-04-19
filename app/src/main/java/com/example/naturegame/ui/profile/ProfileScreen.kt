@@ -18,6 +18,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.naturegame.viewmodel.ProfileViewModel
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun ProfileScreen() {
@@ -39,11 +41,26 @@ fun ProfileScreen() {
     val distanceKm = distanceMeters / 1000f
 
     // Image picker
+    val context = LocalContext.current
+
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
-        uri?.let { viewModel.updatePicture(it.toString()) }
+        uri?.let {
+            // ⭐ FIX: Persist permission so the URI survives app restarts
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    it,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (_: SecurityException) {
+                // Some providers don't support persistable permissions — safe to ignore
+            }
+
+            viewModel.updatePicture(it.toString())
+        }
     }
+
 
     Column(
         modifier = Modifier
