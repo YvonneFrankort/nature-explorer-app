@@ -51,19 +51,29 @@ fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel()) {
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            item {
-                Text(
-                    "${spots.size} discoveries",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-            }
+            // Group by plantLabel (Unknown if null)
+            val grouped = spots
+                .groupBy { it.plantLabel ?: "Unknown" }
+                .toSortedMap() // alphabetical order
 
-            items(
-                items = spots,
-                key = { it.id }
-            ) { spot ->
-                NatureSpotCard(spot = spot, viewModel = viewModel)
+            grouped.forEach { (category, items) ->
+
+                // Category header
+                item {
+                    Text(
+                        text = category,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+
+                // Items under this category
+                items(
+                    items = items,
+                    key = { it.id }
+                ) { spot ->
+                    NatureSpotCard(spot = spot, viewModel = viewModel)
+                }
             }
         }
     }
