@@ -11,80 +11,125 @@ import com.example.naturegame.viewmodel.WalkViewModel
 import com.example.naturegame.viewmodel.ProfileViewModel
 import com.example.naturegame.ui.stats.formatDuration
 import com.example.naturegame.ui.stats.formatDistance
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.core.tween
 
 @Composable
 fun WalkStatsCard(
     viewModel: WalkViewModel,
     profileViewModel: ProfileViewModel = viewModel()
 ) {
-
     val session by viewModel.currentSession.collectAsState()
     val isWalking by viewModel.isWalking.collectAsState()
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+    val enterAnim = remember {
+        androidx.compose.animation.core.tween<Float>(
+            durationMillis = 400
         )
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = if (isWalking) "Walk in progress" else "Walk stopped",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+    }
 
-            session?.let { s ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("${s.stepCount}", style = MaterialTheme.typography.headlineMedium)
-                        Text("steps")
-                    }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            formatDistance(s.distanceMeters),
-                            style = MaterialTheme.typography.headlineMedium
+    var visible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        visible = true
+    }
+
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(animationSpec = tween(400)) +
+                slideInVertically(initialOffsetY = { it / 4 })
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+
+                // Header
+                Text(
+                    text = if (isWalking) "Walk in progress" else "Walk stopped",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                // Stats row
+                session?.let { s ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        StatItem(
+                            label = "Steps",
+                            value = s.stepCount.toString()
                         )
-                        Text("distance")
-                    }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            formatDuration(s.startTime, s.endTime ?: System.currentTimeMillis()),
-                            style = MaterialTheme.typography.headlineMedium
+
+                        StatItem(
+                            label = "Distance",
+                            value = formatDistance(s.distanceMeters)
                         )
-                        Text("time")
+
+                        StatItem(
+                            label = "Time",
+                            value = formatDuration(
+                                s.startTime,
+                                s.endTime ?: System.currentTimeMillis()
+                            )
+                        )
                     }
                 }
-            }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp)
-            ) {
-                if (!isWalking) {
-                    Button(
-                        onClick = { viewModel.startWalk() },
-                        modifier = Modifier.weight(1f)
-                    ) { Text("Start walk") }
-                } else {
-                    OutlinedButton(
-                        onClick = {
-                            viewModel.stopWalk { session ->
-                                // callback if needed
-                            }
-                        },
-                        modifier = Modifier.weight(1f)
-                    ) { Text("Stop") }
+                // Start/Stop button
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    if (!isWalking) {
+                        Button(
+                            onClick = { viewModel.startWalk() },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Start walk")
+                        }
+                    } else {
+                        OutlinedButton(
+                            onClick = { viewModel.stopWalk { } },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Stop")
+                        }
+                    }
                 }
             }
         }
     }
 }
+
+
+    @Composable
+    private fun StatItem(label: String, value: String) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.headlineSmall
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+
+
+

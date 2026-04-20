@@ -24,6 +24,14 @@ import coil.compose.AsyncImage
 import com.example.naturegame.data.local.entity.NatureSpot
 import com.example.naturegame.util.toFormattedDate
 import java.io.File
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.core.tween
+import kotlinx.coroutines.delay
+import androidx.compose.foundation.lazy.itemsIndexed
+import com.example.naturegame.utils.getCategoryColor
+
 
 @Composable
 fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel()) {
@@ -58,33 +66,74 @@ fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel()) {
 
             grouped.forEach { (category, items) ->
 
-                // Category header
+                // Animated category header
                 item {
-                    Text(
-                        text = category,
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
+                    var headerVisible by remember { mutableStateOf(false) }
+
+                    LaunchedEffect(Unit) {
+                        headerVisible = true
+                    }
+
+                    AnimatedVisibility(
+                        visible = headerVisible,
+                        enter = fadeIn(animationSpec = tween(300))
+                    ) {
+                        Text(
+                            text = category,
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
                 }
 
-                // Items under this category
-                items(
+                // Animated items under this category
+                itemsIndexed(
                     items = items,
-                    key = { it.id }
-                ) { spot ->
-                    NatureSpotCard(spot = spot, viewModel = viewModel)
+                    key = { _, spot -> spot.id }
+                ) { index, spot ->
+
+                    var visible by remember { mutableStateOf(false) }
+
+                    LaunchedEffect(Unit) {
+                        delay(index * 50L)   // stagger effect
+                        visible = true
+                    }
+
+                    val backgroundColor = getCategoryColor(category).copy(alpha = 0.25f)
+
+                    AnimatedVisibility(
+                        visible = visible,
+                        enter = fadeIn(animationSpec = tween(300)) +
+                                slideInVertically(initialOffsetY = { it / 8 })
+                    ) {
+                        NatureSpotCard(
+                            spot = spot,
+                            viewModel = viewModel,
+                            backgroundColor = backgroundColor
+                        )
+                    }
                 }
             }
+
         }
     }
 }
 
 @Composable
-fun NatureSpotCard(spot: NatureSpot, viewModel: DiscoverViewModel) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
+fun NatureSpotCard(
+    spot: NatureSpot,
+    viewModel: DiscoverViewModel,
+    backgroundColor: Color
+)
+ {
+     Card(
+         modifier = Modifier.fillMaxWidth(),
+         colors = CardDefaults.cardColors(
+             containerColor = backgroundColor
+         ),
+         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+     )
+     {
         Row(modifier = Modifier.padding(12.dp)) {
 
             val localFile = spot.imageLocalPath?.let { File(it) }
