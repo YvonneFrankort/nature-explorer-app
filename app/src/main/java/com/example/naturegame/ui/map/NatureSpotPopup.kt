@@ -23,78 +23,93 @@ fun NatureSpotPopup(
     spot: NatureSpot,
     onDismiss: () -> Unit
 ) {
+    // Dimmed background
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0x88000000)),
+            .background(Color(0x66000000)),
         contentAlignment = Alignment.Center
     ) {
         Card(
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(20.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
             modifier = Modifier
                 .padding(24.dp)
                 .fillMaxWidth()
         ) {
             Column(
                 modifier = Modifier.padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
 
-                // Category color bar
+                // Category color stripe
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(6.dp)
+                        .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
                         .background(
-                            Color(android.graphics.Color.parseColor(
-                                getCategoryColorHex(spot.plantLabel ?: "unknown")
-                            ))
+                            Color(
+                                android.graphics.Color.parseColor(
+                                    getCategoryColorHex(spot.plantLabel ?: "unknown")
+                                )
+                            )
                         )
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                // Image (local or remote)
+                val localFile = spot.imageLocalPath?.let { File(it) }
+                val imageModel =
+                    if (localFile != null && localFile.exists()) localFile
+                    else spot.imageFirebaseUrl
 
-                // ⭐ Image thumbnail
-                spot.imageLocalPath?.let { path ->
+                if (imageModel != null) {
                     Image(
-                        painter = rememberAsyncImagePainter(File(path)),
+                        painter = rememberAsyncImagePainter(imageModel),
                         contentDescription = "Nature spot image",
                         modifier = Modifier
-                            .size(180.dp)
-                            .padding(bottom = 12.dp)
+                            .fillMaxWidth()
+                            .height(180.dp)
                             .clip(RoundedCornerShape(12.dp)),
                         contentScale = ContentScale.Crop
                     )
                 }
 
-                // Category name
+                // Title
                 Text(
                     text = spot.plantLabel ?: spot.name,
-                    style = MaterialTheme.typography.headlineSmall
+                    style = MaterialTheme.typography.titleLarge
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Date + time
+                // Date
                 Text(
                     text = spot.timestamp.toFormattedDate(),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // User note
+                // Note
                 spot.note?.takeIf { it.isNotBlank() }?.let { note ->
                     Text(
                         text = note,
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(horizontal = 8.dp),
-                        maxLines = 3
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 4
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                Button(onClick = onDismiss) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Close button
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.End)
+                ) {
                     Text("Close")
                 }
             }
