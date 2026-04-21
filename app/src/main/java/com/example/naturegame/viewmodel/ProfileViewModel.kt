@@ -8,12 +8,9 @@ import com.example.naturegame.data.repository.WalkRepository
 import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.map
+
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val repository: ProfileRepository,
@@ -21,6 +18,9 @@ class ProfileViewModel @Inject constructor(
     private val walkRepository: WalkRepository,
 ) : ViewModel() {
 
+    // -----------------------------
+    // USER AUTH
+    // -----------------------------
     private val _currentUser = MutableStateFlow<FirebaseUser?>(authManager.currentUser)
     val currentUser: StateFlow<FirebaseUser?> = _currentUser
 
@@ -38,6 +38,9 @@ class ProfileViewModel @Inject constructor(
         _currentUser.value = null
     }
 
+    // -----------------------------
+    // PROFILE DATA
+    // -----------------------------
     val profileName: StateFlow<String> =
         repository.profileName.stateIn(
             viewModelScope,
@@ -52,25 +55,24 @@ class ProfileViewModel @Inject constructor(
             ""
         )
 
+    fun updateName(name: String) {
+        viewModelScope.launch { repository.updateName(name) }
+    }
+
+    fun updatePicture(uri: String) {
+        viewModelScope.launch { repository.updatePicture(uri) }
+    }
+
+    // -----------------------------
+    // WALKING DATA
+    // -----------------------------
     val totalSteps = walkRepository.getAllSessions()
-        .map { sessions ->
-            sessions.sumOf { it.stepCount }
-        }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            0
-        )
+        .map { sessions -> sessions.sumOf { it.stepCount } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     val totalDistance = walkRepository.getAllSessions()
-        .map { sessions ->
-            sessions.sumOf { it.distanceMeters.toDouble() }.toFloat()
-        }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            0f
-        )
+        .map { sessions -> sessions.sumOf { it.distanceMeters.toDouble() }.toFloat() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0f)
 
     val findingsCount: StateFlow<Int> =
         repository.findingsCount.stateIn(
@@ -79,16 +81,51 @@ class ProfileViewModel @Inject constructor(
             0
         )
 
-    fun updateName(name: String) {
-        viewModelScope.launch {
-            repository.updateName(name)
-        }
+    // -----------------------------
+    // SETTINGS: UNIT SWITCHING
+    // -----------------------------
+    private val _useMiles = MutableStateFlow(false)
+    val useMiles: StateFlow<Boolean> = _useMiles
+
+    fun toggleUnits() {
+        _useMiles.value = !_useMiles.value
     }
 
-    fun updatePicture(uri: String) {
+    // -----------------------------
+    // BADGES
+    // -----------------------------
+    data class Badge(
+        val id: String,
+        val label: String,
+        val unlocked: Boolean
+    )
+
+    val badges: StateFlow<List<Badge>> =
+        combine(totalSteps, findingsCount, totalDistance) { steps, findings, distance ->
+            listOf(
+                Badge("walker", "Walker", steps >= 1000),
+                Badge("explorer", "Explorer", findings >= 5),
+                Badge("tracker", "Tracker", distance >= 1000f)
+            )
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList()
+        )
+
+
+    // -----------------------------
+    // RESET PROGRESS
+    // -----------------------------
+    fun resetAll() {
         viewModelScope.launch {
-            repository.updatePicture(uri)
+            // Reset DataStore values
+            repository.updateName("Explorer")
+            repository.updatePicture("")
+
+            // Reset walking data (via WalkRepository)
+            walkRepository.clearAllSessions()
+
         }
     }
-
 }

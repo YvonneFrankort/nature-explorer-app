@@ -24,4 +24,7 @@ class WalkRepository(
         walkSessionDao.getAllSessions().map { sessions ->
             sessions.sumOf { it.distanceMeters.toDouble() }.toFloat()
         }
+    suspend fun clearAllSessions() {
+        walkSessionDao.deleteAllSessions()
+    }
 }

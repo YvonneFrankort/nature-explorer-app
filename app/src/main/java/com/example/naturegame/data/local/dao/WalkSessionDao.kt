@@ -27,4 +27,8 @@ interface WalkSessionDao {
 
     @Query("SELECT * FROM walk_sessions ORDER BY startTime DESC")
     suspend fun getAllSessionsOnce(): List<WalkSession>
+
+    @Query("DELETE FROM walk_sessions")
+    suspend fun deleteAllSessions()
+
 }
