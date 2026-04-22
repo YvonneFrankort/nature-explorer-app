@@ -37,84 +37,90 @@ import com.example.naturegame.utils.getCategoryColor
 fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel()) {
     val spots by viewModel.allSpots.collectAsState()
 
-    if (spots.isEmpty()) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(
-                    Icons.Outlined.Nature,
-                    contentDescription = null,
-                    modifier = Modifier.size(64.dp),
-                    tint = Color.Gray
-                )
-                Text("No discoveries yet", modifier = Modifier.padding(8.dp))
-                Text(
-                    "Take a photo of plants with the camera!",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
-                )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF7F7F7))
+    ) {
+        if (spots.isEmpty()) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        Icons.Outlined.Nature,
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
+                        tint = Color.Gray
+                    )
+                    Text("No discoveries yet", modifier = Modifier.padding(8.dp))
+                    Text(
+                        "Take a photo of plants with the camera!",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                }
             }
-        }
-    } else {
-        LazyColumn(
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // Group by plantLabel (Unknown if null)
-            val grouped = spots
-                .groupBy { it.plantLabel ?: "Unknown" }
-                .toSortedMap() // alphabetical order
+        } else {
+            LazyColumn(
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Group by plantLabel (Unknown if null)
+                val grouped = spots
+                    .groupBy { it.plantLabel ?: "Unknown" }
+                    .toSortedMap() // alphabetical order
 
-            grouped.forEach { (category, items) ->
+                grouped.forEach { (category, items) ->
 
-                // Animated category header
-                item {
-                    var headerVisible by remember { mutableStateOf(false) }
+                    // Animated category header
+                    item {
+                        var headerVisible by remember { mutableStateOf(false) }
 
-                    LaunchedEffect(Unit) {
-                        headerVisible = true
+                        LaunchedEffect(Unit) {
+                            headerVisible = true
+                        }
+
+                        AnimatedVisibility(
+                            visible = headerVisible,
+                            enter = fadeIn(animationSpec = tween(300))
+                        ) {
+                            Text(
+                                text = category,
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
                     }
 
-                    AnimatedVisibility(
-                        visible = headerVisible,
-                        enter = fadeIn(animationSpec = tween(300))
-                    ) {
-                        Text(
-                            text = category,
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
+                    // Animated items under this category
+                    itemsIndexed(
+                        items = items,
+                        key = { _, spot -> spot.id }
+                    ) { index, spot ->
+
+                        var visible by remember { mutableStateOf(false) }
+
+                        LaunchedEffect(Unit) {
+                            delay(index * 50L)   // stagger effect
+                            visible = true
+                        }
+
+                        val backgroundColor = getCategoryColor(category).copy(alpha = 0.25f)
+
+                        AnimatedVisibility(
+                            visible = visible,
+                            enter = fadeIn(animationSpec = tween(300)) +
+                                    slideInVertically(initialOffsetY = { it / 8 })
+                        ) {
+                            NatureSpotCard(
+                                spot = spot,
+                                viewModel = viewModel,
+                                backgroundColor = backgroundColor
+                            )
+                        }
                     }
                 }
 
-                // Animated items under this category
-                itemsIndexed(
-                    items = items,
-                    key = { _, spot -> spot.id }
-                ) { index, spot ->
-
-                    var visible by remember { mutableStateOf(false) }
-
-                    LaunchedEffect(Unit) {
-                        delay(index * 50L)   // stagger effect
-                        visible = true
-                    }
-
-                    val backgroundColor = getCategoryColor(category).copy(alpha = 0.25f)
-
-                    AnimatedVisibility(
-                        visible = visible,
-                        enter = fadeIn(animationSpec = tween(300)) +
-                                slideInVertically(initialOffsetY = { it / 8 })
-                    ) {
-                        NatureSpotCard(
-                            spot = spot,
-                            viewModel = viewModel,
-                            backgroundColor = backgroundColor
-                        )
-                    }
-                }
             }
-
         }
     }
 }

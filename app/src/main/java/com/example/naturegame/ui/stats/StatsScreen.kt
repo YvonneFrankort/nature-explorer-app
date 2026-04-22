@@ -1,5 +1,6 @@
 package com.example.naturegame.ui.stats
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,6 +12,13 @@ import com.example.naturegame.viewmodel.StatsViewModel
 import com.example.naturegame.viewmodel.toFormattedDate
 import com.example.naturegame.data.local.entity.WalkSession
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
+
 @Composable
 fun StatsScreen(
     statsViewModel: StatsViewModel
@@ -20,10 +28,13 @@ fun StatsScreen(
     val totalDistance by statsViewModel.totalDistance.collectAsStateWithLifecycle()
     val totalWalks by statsViewModel.totalWalks.collectAsStateWithLifecycle()
 
+    // ⭐ Longest walk
+    val longestWalk = sessions.maxByOrNull { it.distanceMeters }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color(0xFFF7F7F7))
             .padding(16.dp)
     ) {
 
@@ -34,20 +45,13 @@ fun StatsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        SummaryCard(
-            title = "Total Steps",
-            value = totalSteps.toString()
-        )
+        SummaryCard("Total Steps: ", totalSteps.toString(), Icons.Default.DirectionsWalk)
+        SummaryCard("Total Distance: ", formatDistance(totalDistance), Icons.Default.Map)
+        SummaryCard("Total Walks: ", totalWalks.toString(), Icons.Default.Timer)
 
-        SummaryCard(
-            title = "Total Distance",
-            value = formatDistance(totalDistance)
-        )
-
-        SummaryCard(
-            title = "Total Walks",
-            value = totalWalks.toString()
-        )
+        if (longestWalk != null) {
+            HighlightBox("Longest walk: ${formatDistance(longestWalk.distanceMeters)}")
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -58,29 +62,41 @@ fun StatsScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        LazyColumn {
-            items(sessions) { session ->
-                WalkSessionItem(session)
+        SectionBox {
+            LazyColumn {
+                items(sessions) { session ->
+                    WalkSessionItem(session)
+                    Divider(
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                        thickness = 1.dp,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun SummaryCard(title: String, value: String) {
+fun SummaryCard(title: String, value: String, icon: ImageVector) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
         )
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(title, style = MaterialTheme.typography.titleMedium)
+            }
             Text(value, style = MaterialTheme.typography.headlineSmall)
         }
     }
@@ -109,6 +125,41 @@ fun WalkSessionItem(session: WalkSession) {
     }
 }
 
+@Composable
+fun HighlightBox(text: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                shape = MaterialTheme.shapes.medium
+            )
+            .padding(16.dp)
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
+}
+
+@Composable
+fun SectionBox(content: @Composable () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.15f),
+                shape = MaterialTheme.shapes.medium
+            )
+            .padding(vertical = 12.dp)
+    ) {
+        content()
+    }
+}
+
 fun formatDistance(meters: Float): String {
     return if (meters < 1000f) {
         "${meters.toInt()} m"
@@ -128,4 +179,3 @@ fun formatDuration(startTime: Long, endTime: Long = System.currentTimeMillis()):
         else -> "${seconds}s"
     }
 }
-
