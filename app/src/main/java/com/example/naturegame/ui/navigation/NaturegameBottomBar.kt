@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.compose.ui.Modifier
 
 @Composable
 fun NatureGameBottomBar(navController: NavController) {
@@ -30,7 +31,8 @@ fun NatureGameBottomBar(navController: NavController) {
                         contentDescription = screen.label
                     )
                 },
-                label = { Text(screen.label) }
+                label = { Text(screen.label) },
+                modifier = Modifier.weight(1f)
             )
         }
     }

@@ -25,10 +25,13 @@ import org.osmdroid.views.overlay.Polyline
 
 @Composable
 fun MapScreen(
+    lat: Double? = null,
+    lng: Double? = null,
     mapViewModel: MapViewModel = hiltViewModel(),
     walkViewModel: WalkViewModel = hiltViewModel(),
     profileViewModel: ProfileViewModel = hiltViewModel()
-) {
+)
+ {
     val context = LocalContext.current
 
     LocationAndActivityPermissions(onAllGranted = {})
@@ -49,27 +52,28 @@ fun MapScreen(
 
     val defaultPosition = GeoPoint(65.0121, 25.4651)
 
+    // OSMDroid config
+    DisposableEffect(Unit) {
+        Configuration.getInstance().load(
+            context,
+            context.getSharedPreferences("osmdroid", 0)
+        )
+        Configuration.getInstance().userAgentValue = context.packageName
+        onDispose {}
+    }
+
+    // ⭐ Delay MapView creation by one frame (fixes SIGKILL)
+    var ready by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { ready = true }
+
     Column(Modifier.fillMaxSize()) {
 
         Box(Modifier.weight(1f)) {
 
-            // OSMDroid config
-            DisposableEffect(Unit) {
-                Configuration.getInstance().load(
-                    context,
-                    context.getSharedPreferences("osmdroid", 0)
-                )
-                Configuration.getInstance().userAgentValue = context.packageName
-                onDispose {}
-            }
-
-            // MapView created once
-            val mapView = remember { MapView(context) }
-
             var selectedSpot by remember { mutableStateOf<NatureSpot?>(null) }
             var followUser by remember { mutableStateOf(true) }
 
-            // Polyline created once
+            // Polyline remembered
             val polyline = remember {
                 Polyline().apply {
                     outlinePaint.color = 0xFF2E7D32.toInt()
@@ -78,84 +82,72 @@ fun MapScreen(
                 }
             }
 
-            // Marker list remembered
-            val markers = remember { mutableStateListOf<Marker>() }
+            if (ready) {
+                AndroidView(
+                    modifier = Modifier.fillMaxSize(),
+                    factory = { ctx ->
+                        MapView(ctx).apply {
+                            setTileSource(TileSourceFactory.MAPNIK)
+                            setMultiTouchControls(true)
+                            controller.setZoom(15.0)
+                            controller.setCenter(defaultPosition)
 
-            // Setup map once
-            DisposableEffect(Unit) {
-                mapView.setTileSource(TileSourceFactory.MAPNIK)
-                mapView.setMultiTouchControls(true)
-                mapView.controller.setZoom(15.0)
-                mapView.controller.setCenter(defaultPosition)
+                            overlays.add(polyline)
 
-                // Add polyline once
-                if (!mapView.overlays.contains(polyline)) {
-                    mapView.overlays.add(polyline)
-                }
-
-                onDispose { mapView.onDetach() }
-            }
-
-            // Update markers when natureSpots changes
-            LaunchedEffect(natureSpots) {
-                markers.clear()
-                natureSpots.forEach { spot ->
-                    val marker = Marker(mapView).apply {
-                        position = GeoPoint(spot.latitude, spot.longitude)
-                        title = spot.plantLabel ?: spot.name
-                        snippet = spot.timestamp.toFormattedDate()
-
-                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-
-                        val colorHex = getCategoryColorHex(spot.plantLabel ?: "unknown")
-                        val tintedIcon = getTintedDefaultMarker(context, colorHex)
-                        val safeIcon = tintedIcon
-                            ?: context.getDrawable(org.osmdroid.library.R.drawable.marker_default)!!
-
-                        icon = scaleDrawable(safeIcon, 2f)
-
-                        setOnMarkerClickListener { _, _ ->
-                            selectedSpot = spot
-                            true
+                            setOnTouchListener { _, _ ->
+                                followUser = false
+                                false
+                            }
                         }
-                    }
-                    markers.add(marker)
-                }
-            }
+                    },
+                    update = { map ->
 
-            AndroidView(
-                factory = { mapView },
-                modifier = Modifier.fillMaxSize(),
-                update = { map ->
+                        // Update polyline
+                        polyline.setPoints(routePoints)
 
-                    // Update polyline points
-                    polyline.setPoints(routePoints)
+                        // Rebuild markers
+                        map.overlays.removeAll { it is Marker }
+                        natureSpots.forEach { spot ->
+                            val marker = Marker(map).apply {
+                                position = GeoPoint(spot.latitude, spot.longitude)
+                                title = spot.plantLabel ?: spot.name
+                                snippet = spot.timestamp.toFormattedDate()
 
-                    // Add markers if missing
-                    markers.forEach { marker ->
-                        if (!map.overlays.contains(marker)) {
+                                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+
+                                val colorHex = getCategoryColorHex(spot.plantLabel ?: "unknown")
+                                val tintedIcon = getTintedDefaultMarker(context, colorHex)
+                                val safeIcon = tintedIcon
+                                    ?: context.getDrawable(org.osmdroid.library.R.drawable.marker_default)!!
+
+                                icon = scaleDrawable(safeIcon, 2f)
+
+                                setOnMarkerClickListener { _, _ ->
+                                    selectedSpot = spot
+                                    true
+                                }
+                            }
                             map.overlays.add(marker)
                         }
-                    }
 
-                    // Follow user
-                    currentLocation?.let { loc ->
-                        if (followUser) {
-                            map.controller.animateTo(GeoPoint(loc.latitude, loc.longitude))
+                        // Follow user
+                        currentLocation?.let { loc ->
+                            if (followUser) {
+                                map.controller.animateTo(GeoPoint(loc.latitude, loc.longitude))
+                            }
                         }
+
+                        // ⭐ Jump to spot if opened from Timeline
+                        if (lat != null && lng != null) {
+                            followUser = false
+                            map.controller.setZoom(17.0)
+                            map.controller.animateTo(GeoPoint(lat, lng))
+                        }
+
+
+                        map.invalidate()
                     }
-
-                    map.invalidate()
-                }
-            )
-
-            // Stop following when user touches map
-            DisposableEffect(Unit) {
-                mapView.setOnTouchListener { _, _ ->
-                    followUser = false
-                    false
-                }
-                onDispose {}
+                )
             }
 
             if (selectedSpot != null) {

@@ -16,14 +16,16 @@ sealed class Screen(
     // Kameranäkymä: CameraX-esikatselu + kuvaaminen
     object Camera : Screen("camera", "Camera", Icons.Filled.CameraAlt)
     // Löydöt: muiden käyttäjien havainnot Firebasesta
-    object Discover : Screen("discover", "Discover", Icons.Filled.Explore)
+    object Discover : Screen("discover", "Explore", Icons.Filled.Explore)
     // Tilastot: askeleet, matka, omat havainnot
     object Stats : Screen("stats", "Stats", Icons.Filled.BarChart)
 
     object Profile : Screen("profile", "Profile", Icons.Filled.Person)
 
+    object Timeline : Screen("timeline", "History", Icons.Filled.History)
+
     companion object {
         // Lista kaikista bottom nav -kohteista
-        val bottomNavScreens = listOf(Map, Camera, Discover, Stats, Profile)
+        val bottomNavScreens = listOf(Map, Camera, Discover, Stats, Timeline, Profile)
     }
 }
