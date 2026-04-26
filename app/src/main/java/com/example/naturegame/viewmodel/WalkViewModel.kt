@@ -23,6 +23,9 @@ class WalkViewModel(application: Application) : AndroidViewModel(application) {
     private val _isWalking = MutableStateFlow(false)
     val isWalking: StateFlow<Boolean> = _isWalking.asStateFlow()
 
+    private val _isPaused = MutableStateFlow(false)
+    val isPaused: StateFlow<Boolean> = _isPaused.asStateFlow()
+
     private var stepsAtStart: Int? = null
     private var stepsDuringWalk: Int = 0
 
@@ -32,6 +35,7 @@ class WalkViewModel(application: Application) : AndroidViewModel(application) {
         val session = WalkSession()
         _currentSession.value = session
         _isWalking.value = true
+        _isPaused.value = false
 
         // Save only the start of the session
         viewModelScope.launch {
@@ -39,6 +43,9 @@ class WalkViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         stepManager.startStepCounting { totalSteps ->
+
+            // While paused, ignore updates (UI freezes)
+            if (_isPaused.value) return@startStepCounting
 
             if (stepsAtStart == null) {
                 stepsAtStart = totalSteps
@@ -58,9 +65,18 @@ class WalkViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun pauseWalk() {
+        _isPaused.value = true
+    }
+
+    fun resumeWalk() {
+        _isPaused.value = false
+    }
+
     fun stopWalk(onWalkFinished: (WalkSession) -> Unit) {
         stepManager.stopStepCounting()
         _isWalking.value = false
+        _isPaused.value = false
 
         stepsAtStart = null
 

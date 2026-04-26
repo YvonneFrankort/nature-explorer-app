@@ -12,14 +12,12 @@ import kotlin.coroutines.resumeWithException
 
 class PlantClassifier {
 
-    // Lower threshold → ML Kit gives more usable labels
     private val labeler = ImageLabeling.getClient(
         ImageLabelerOptions.Builder()
             .setConfidenceThreshold(0.3f)
             .build()
     )
 
-    // Expanded nature keywords
     private val natureKeywords = mapOf(
         "Flower" to listOf("flower", "blossom", "bloom"),
         "Plant" to listOf("plant", "flora", "vegetation", "leaf", "herb", "botanical"),

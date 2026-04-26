@@ -1,7 +1,6 @@
 package com.example.naturegame.ui.discover
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,22 +18,32 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.naturegame.data.local.entity.NatureSpot
 import com.example.naturegame.util.toFormattedDate
 import java.io.File
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.core.tween
-import kotlinx.coroutines.delay
-import androidx.compose.foundation.lazy.itemsIndexed
 import com.example.naturegame.utils.getCategoryColor
-
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.example.naturegame.data.remote.firebase.AuthManager
+import androidx.compose.runtime.collectAsState
 
 @Composable
-fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel()) {
+fun DiscoverScreen(
+    navController: NavController,
+    authManager: AuthManager,
+    viewModel: DiscoverViewModel = hiltViewModel()
+) {
+
+    if (!authManager.isSignedIn) {
+        LaunchedEffect(Unit) {
+            navController.navigate("login") {
+                popUpTo("discover") { inclusive = true }
+            }
+        }
+        return
+    }
+
     val spots by viewModel.allSpots.collectAsState()
 
     Box(
@@ -64,66 +73,39 @@ fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel()) {
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Group by plantLabel (Unknown if null)
                 val grouped = spots
                     .groupBy { it.plantLabel ?: "Unknown" }
-                    .toSortedMap() // alphabetical order
+                    .toSortedMap()
 
                 grouped.forEach { (category, items) ->
 
-                    // Animated category header
+                    // Simple fade-in header (safe)
                     item {
-                        var headerVisible by remember { mutableStateOf(false) }
-
-                        LaunchedEffect(Unit) {
-                            headerVisible = true
-                        }
-
-                        AnimatedVisibility(
-                            visible = headerVisible,
-                            enter = fadeIn(animationSpec = tween(300))
-                        ) {
-                            Text(
-                                text = category,
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(vertical = 8.dp)
-                            )
-                        }
+                        Text(
+                            text = category,
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
                     }
 
-                    // Animated items under this category
-                    itemsIndexed(
+                    items(
                         items = items,
-                        key = { _, spot -> spot.id }
-                    ) { index, spot ->
-
-                        var visible by remember { mutableStateOf(false) }
-
-                        LaunchedEffect(Unit) {
-                            delay(index * 50L)   // stagger effect
-                            visible = true
-                        }
-
+                        key = { it.id }
+                    ) { spot ->
                         val backgroundColor = getCategoryColor(category).copy(alpha = 0.25f)
 
-                        AnimatedVisibility(
-                            visible = visible,
-                            enter = fadeIn(animationSpec = tween(300)) +
-                                    slideInVertically(initialOffsetY = { it / 8 })
-                        ) {
-                            NatureSpotCard(
-                                spot = spot,
-                                viewModel = viewModel,
-                                backgroundColor = backgroundColor
-                            )
-                        }
+                        NatureSpotCard(
+                            spot = spot,
+                            viewModel = viewModel,
+                            backgroundColor = backgroundColor
+                        )
                     }
                 }
-
             }
         }
     }
 }
+
 
 @Composable
 fun NatureSpotCard(
@@ -142,10 +124,15 @@ fun NatureSpotCard(
      {
         Row(modifier = Modifier.padding(12.dp)) {
 
-            val localFile = spot.imageLocalPath?.let { File(it) }
-            val imageModel =
-                if (localFile != null && localFile.exists()) localFile
-                else spot.imageFirebaseUrl
+            val imageModel = when {
+                spot.imageLocalPath != null && File(spot.imageLocalPath).exists() ->
+                    File(spot.imageLocalPath)
+
+                !spot.imageFirebaseUrl.isNullOrBlank() ->
+                    spot.imageFirebaseUrl
+
+                else -> null
+            }
 
             if (imageModel != null) {
                 AsyncImage(
@@ -213,7 +200,7 @@ fun NatureSpotCard(
                 }
 
                 Text(
-                    text = spot.timestamp.toFormattedDate(),
+                    text = spot.timestamp?.toFormattedDate() ?: "No date",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )

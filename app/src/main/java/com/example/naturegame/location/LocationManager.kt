@@ -23,6 +23,12 @@ class LocationManager(private val context: Context) {
     private val _routePoints = MutableStateFlow<List<GeoPoint>>(emptyList())
     val routePoints: StateFlow<List<GeoPoint>> = _routePoints.asStateFlow()
 
+    private val _isPaused = MutableStateFlow(false)
+    val isPaused: StateFlow<Boolean> = _isPaused.asStateFlow()
+
+    fun pause() { _isPaused.value = true }
+    fun resume() { _isPaused.value = false }
+
     private var callback: LocationCallback? = null
 
     @SuppressLint("MissingPermission")
@@ -44,10 +50,11 @@ class LocationManager(private val context: Context) {
 
                 _currentLocation.value = loc
 
+                if (_isPaused.value) return
+
                 val point = GeoPoint(loc.latitude, loc.longitude)
                 val last = _routePoints.value.lastOrNull()
 
-                // 🟡 1. remove only micro-jitter (very small movements)
                 if (last != null) {
                     val results = FloatArray(1)
 
@@ -57,11 +64,15 @@ class LocationManager(private val context: Context) {
                         results
                     )
 
-                    if (results[0] < 1f) return // ignore noise only
-                    if (results[0] > 100f) return // ignore GPS spikes
+                    val distance = results[0]
+
+                    if (distance < 1f) return
+
+                    if (distance > 50f) return
+
+                    if (distance < 5f) return
                 }
 
-                // 🟢 2. optional tiny smoothing (lightweight)
                 val finalPoint = if (last != null) {
                     GeoPoint(
                         (last.latitude + point.latitude) / 2,
@@ -71,7 +82,6 @@ class LocationManager(private val context: Context) {
                     point
                 }
 
-                // 🟢 3. update immediately (no throttling)
                 _routePoints.value = _routePoints.value + finalPoint
             }
         }

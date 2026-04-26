@@ -1,7 +1,6 @@
 package com.example.naturegame.utils
 
 import androidx.compose.ui.graphics.Color
-import android.graphics.Color as AndroidColor
 
 fun getCategoryColorHex(category: String): String {
     return when (category.lowercase()) {

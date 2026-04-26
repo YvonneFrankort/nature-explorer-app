@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.hilt)
-    alias(libs.plugins.google.services)
+    id("com.google.gms.google-services")
     id("org.jetbrains.kotlin.kapt")
     id("org.jetbrains.kotlin.plugin.compose") version "2.0.21"
 }
@@ -39,7 +39,6 @@ android {
             )
         }
         debug {
-//            applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
         }
     }
@@ -124,4 +123,7 @@ dependencies {
 
     // --- Splashscreen ---
     implementation(libs.androidx.core.splashscreen)
+
+    // --- Debug ----
+    debugImplementation("com.google.firebase:firebase-appcheck-debug:17.1.2")
 }

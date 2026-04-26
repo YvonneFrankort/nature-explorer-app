@@ -8,13 +8,10 @@ import com.example.naturegame.data.repository.WalkRepository
 import com.example.naturegame.data.local.entity.WalkSession
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 @HiltViewModel
 class StatsViewModel @Inject constructor(
@@ -33,7 +30,6 @@ class StatsViewModel @Inject constructor(
                 emptyList()
             )
 
-    // ⭐ Reactive summary values (THIS FIXES YOUR BUG)
     val totalSteps: StateFlow<Int> =
         sessions.map { list ->
             list.sumOf { it.stepCount }

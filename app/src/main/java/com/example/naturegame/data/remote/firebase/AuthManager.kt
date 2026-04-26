@@ -7,7 +7,6 @@ import kotlinx.coroutines.tasks.await
 class AuthManager {
     private val auth = FirebaseAuth.getInstance()
 
-    // Nykyinen kirjautunut käyttäjä (null jos ei kirjautunut)
     val currentUser: FirebaseUser?
         get() = auth.currentUser
 
@@ -17,19 +16,45 @@ class AuthManager {
     val isSignedIn: Boolean
         get() = auth.currentUser != null
 
-    // Kirjaudu sisään anonyymisti (tai palauta olemassa oleva sessio)
     suspend fun signInAnonymously(): Result<String> {
         return try {
-            // Jos jo kirjautunut, palauta nykyinen UID
             val existingUser = auth.currentUser
             if (existingUser != null) {
                 return Result.success(existingUser.uid)
             }
 
-            // Luo uusi anonyymi käyttäjä
             val result = auth.signInAnonymously().await()
-            val uid = result.user?.uid ?: return Result.failure(Exception("UID puuttuu"))
+            val uid = result.user?.uid ?: return Result.failure(Exception("UID missing"))
             Result.success(uid)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun register(email: String, password: String): Result<String> {
+        return try {
+            val result = auth.createUserWithEmailAndPassword(email, password).await()
+            val uid = result.user?.uid ?: return Result.failure(Exception("UID missing"))
+            Result.success(uid)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun login(email: String, password: String): Result<String> {
+        return try {
+            val result = auth.signInWithEmailAndPassword(email, password).await()
+            val uid = result.user?.uid ?: return Result.failure(Exception("UID missing"))
+            Result.success(uid)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun sendPasswordReset(email: String): Result<Unit> {
+        return try {
+            auth.sendPasswordResetEmail(email).await()
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }

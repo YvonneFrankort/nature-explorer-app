@@ -14,11 +14,13 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 import javax.inject.Inject
+import com.example.naturegame.data.remote.firebase.AuthManager
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val repository: NatureSpotRepository,
-    private val locationManager: LocationManager
+    private val locationManager: LocationManager,
+    private val authManager: AuthManager
 ) : ViewModel() {
 
     val routePoints: StateFlow<List<GeoPoint>> = locationManager.routePoints
@@ -28,7 +30,12 @@ class MapViewModel @Inject constructor(
     val natureSpots: StateFlow<List<NatureSpot>> = _natureSpots.asStateFlow()
 
     init {
-        loadNatureSpots()
+        viewModelScope.launch {
+            while (authManager.currentUserId == null) {
+                kotlinx.coroutines.delay(50)
+            }
+            loadNatureSpots()
+        }
     }
 
     fun startTracking() = locationManager.startTracking()
@@ -49,7 +56,6 @@ class MapViewModel @Inject constructor(
     }
 }
 
-// Helper for formatting timestamps
 fun Long.toFormattedDate(): String {
     val sdf = java.text.SimpleDateFormat("dd.MM.yyyy HH:mm", java.util.Locale.getDefault())
     return sdf.format(java.util.Date(this))

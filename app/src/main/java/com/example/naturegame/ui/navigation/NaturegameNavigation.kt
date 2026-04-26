@@ -13,56 +13,121 @@ import com.example.naturegame.ui.profile.ProfileScreen
 import com.example.naturegame.ui.stats.StatsScreen
 import com.example.naturegame.viewmodel.CameraViewModel
 import com.example.naturegame.viewmodel.StatsViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.naturegame.ui.timeline.TimelineScreen
 import androidx.compose.runtime.collectAsState
 import com.example.naturegame.viewmodel.MapViewModel
-import com.example.naturegame.viewmodel.WalkViewModel
 import androidx.compose.runtime.getValue
+import com.example.naturegame.ui.login.LoginScreen
+import com.example.naturegame.ui.login.RegisterScreen
+import com.example.naturegame.data.remote.firebase.AuthManager
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 
 @Composable
 fun NatureGameNavigation(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
+
+    val authManager = remember { AuthManager() }
+
     NavHost(
         navController = navController,
-        startDestination = Screen.Map.route,
+        startDestination = "login",
         modifier = modifier
     ) {
-        // Normal map (bottom nav)
-        composable(Screen.Map.route) {
-            MapScreen()
+
+        composable("login") {
+
+            // Auto‑redirect if already logged in
+            LaunchedEffect(Unit) {
+                if (authManager.isSignedIn) {
+                    navController.navigate("map") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                }
+            }
+
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate("map") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                },
+                onNavigateToRegister = {
+                    navController.navigate("register")
+                },
+                authManager = authManager
+            )
         }
 
-// Map with coordinates (timeline jump)
-        composable(
-            route = "map/{lat}/{lng}"
-        ) { backStackEntry ->
+        composable("register") {
+            RegisterScreen(
+                onRegisterSuccess = {
+                    navController.navigate("map") {
+                        popUpTo("register") { inclusive = true }
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.navigate("login") {
+                        popUpTo("register") { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable("map") {
+            MapScreen(
+                navController = navController,
+                authManager = authManager
+            )
+        }
+
+        composable("map/{lat}/{lng}") { backStackEntry ->
             val lat = backStackEntry.arguments?.getString("lat")?.toDoubleOrNull()
             val lng = backStackEntry.arguments?.getString("lng")?.toDoubleOrNull()
-            MapScreen(lat = lat, lng = lng)
+
+            MapScreen(
+                navController = navController,
+                authManager = authManager,
+                lat = lat,
+                lng = lng
+            )
         }
 
-
-        composable(Screen.Camera.route) {
+        composable("camera") {
             val cameraViewModel: CameraViewModel = hiltViewModel()
-            CameraScreen(cameraViewModel)
+            CameraScreen(
+                navController = navController,
+                authManager = authManager,
+                cameraViewModel = cameraViewModel
+            )
         }
 
-        composable(Screen.Discover.route) {
-            DiscoverScreen()
+        composable("discover") {
+            DiscoverScreen(
+                navController = navController,
+                authManager = authManager
+            )
         }
 
-        composable(Screen.Stats.route) {
-            val statsViewModel: StatsViewModel = viewModel()
-            StatsScreen(statsViewModel)
+        composable("stats") {
+            val statsViewModel: StatsViewModel = hiltViewModel()
+            StatsScreen(
+                navController = navController,
+                authManager = authManager,
+                statsViewModel = statsViewModel
+            )
         }
 
-        composable(Screen.Profile.route) {
-            ProfileScreen()
+        composable("profile") {
+            ProfileScreen(
+                navController = navController,
+                authManager = authManager
+            )
         }
-        composable(Screen.Timeline.route) {
+
+        composable("timeline") {
             val statsViewModel: StatsViewModel = hiltViewModel()
             val mapViewModel: MapViewModel = hiltViewModel()
 
@@ -70,6 +135,8 @@ fun NatureGameNavigation(
             val spots by mapViewModel.natureSpots.collectAsState()
 
             TimelineScreen(
+                navController = navController,
+                authManager = authManager,
                 walks = walks,
                 spots = spots,
                 onDiscoveryClick = { spot ->
@@ -79,10 +146,10 @@ fun NatureGameNavigation(
                     navController.navigate("map/${spot.latitude}/${spot.longitude}") {
                         launchSingleTop = true
                         restoreState = true
-                        popUpTo(Screen.Map.route)
+                        popUpTo("map")
                     }
                 }
             )
         }
     }
-    }
+}

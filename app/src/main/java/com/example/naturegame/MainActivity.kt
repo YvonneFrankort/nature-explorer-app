@@ -13,6 +13,11 @@ import com.example.naturegame.ui.navigation.NatureGameNavigation
 import com.example.naturegame.ui.theme.NatureGameTheme
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.FirebaseApp
+import androidx.compose.runtime.CompositionLocalProvider
+import com.example.naturegame.ui.utils.LocalActivity
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -20,11 +25,19 @@ class MainActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
 
+        FirebaseApp.initializeApp(this)
+
+        Log.d("FIREBASE_TEST", "Auth instance: ${FirebaseAuth.getInstance()}")
+
         installSplashScreen()
 
         setContent {
-            NatureGameTheme {
-                NatureGameApp()
+            CompositionLocalProvider(
+                LocalActivity provides this
+            ) {
+                NatureGameTheme {
+                    NatureGameApp()
+                }
             }
         }
     }

@@ -13,7 +13,6 @@ class FirestoreManager {
     private val db = FirebaseFirestore.getInstance()
     private val spotsCollection = db.collection("nature_spots")
 
-    // Save full NatureSpot to Firestore
     suspend fun saveSpot(spot: NatureSpot): Result<Unit> {
         return try {
             val data = mapOf(
@@ -38,7 +37,6 @@ class FirestoreManager {
         }
     }
 
-    // Load full NatureSpot from Firestore
     fun getUserSpots(userId: String): Flow<List<NatureSpot>> = callbackFlow {
         val listener = spotsCollection
             .whereEqualTo("userId", userId)

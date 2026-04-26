@@ -24,12 +24,7 @@ fun WalkStatsCard(
 ) {
     val session by viewModel.currentSession.collectAsState()
     val isWalking by viewModel.isWalking.collectAsState()
-
-    val enterAnim = remember {
-        androidx.compose.animation.core.tween<Float>(
-            durationMillis = 400
-        )
-    }
+    val isPaused by viewModel.isPaused.collectAsState()
 
     var visible by remember { mutableStateOf(false) }
 
@@ -57,14 +52,16 @@ fun WalkStatsCard(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
 
-                // Header
                 Text(
-                    text = if (isWalking) "Walk in progress" else "Walk stopped",
+                    text = when {
+                        !isWalking -> "Walk stopped"
+                        isPaused -> "Paused"
+                        else -> "Walk in progress"
+                    },
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                // Stats row
                 session?.let { s ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -92,8 +89,8 @@ fun WalkStatsCard(
                     }
                 }
 
-                // Start/Stop button
                 Row(modifier = Modifier.fillMaxWidth()) {
+
                     if (!isWalking) {
                         Button(
                             onClick = { viewModel.startWalk() },
@@ -102,6 +99,25 @@ fun WalkStatsCard(
                             Text("Start walk")
                         }
                     } else {
+
+                        if (!isPaused) {
+                            Button(
+                                onClick = { viewModel.pauseWalk() },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text("Pause")
+                            }
+                        } else {
+                            Button(
+                                onClick = { viewModel.resumeWalk() },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text("Resume")
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
                         OutlinedButton(
                             onClick = { viewModel.stopWalk { } },
                             modifier = Modifier.weight(1f)
@@ -114,6 +130,7 @@ fun WalkStatsCard(
         }
     }
 }
+
 
 
     @Composable

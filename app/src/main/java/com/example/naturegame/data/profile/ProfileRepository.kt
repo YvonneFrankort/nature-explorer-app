@@ -5,7 +5,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.example.naturegame.data.local.dao.NatureSpotDao
-import com.example.naturegame.data.profile.profileDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -20,7 +19,6 @@ class ProfileRepository(
         val STEPS = intPreferencesKey("profile_steps")
     }
 
-    // READ FLOWS
     val profileName: Flow<String> = context.profileDataStore.data.map { prefs ->
         prefs[Keys.NAME] ?: "Anonymous user"
     }
@@ -33,10 +31,8 @@ class ProfileRepository(
         prefs[Keys.STEPS] ?: 0
     }
 
-    // NEW: Read discovery count from the database
     val findingsCount: Flow<Int> = natureSpotDao.getNatureSpotCount()
 
-    // WRITE FUNCTIONS
     suspend fun updateName(name: String) {
         context.profileDataStore.edit { prefs ->
             prefs[Keys.NAME] = name

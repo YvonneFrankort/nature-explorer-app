@@ -14,10 +14,8 @@ class NatureSpotRepository(
     private val authManager: AuthManager
 ) {
 
-    // Local Room data (offline-first)
     val allSpots: Flow<List<NatureSpot>> = dao.getAllSpots()
 
-    // Insert a new spot: save locally first, then sync to Firebase
     suspend fun insertSpot(spot: NatureSpot) {
         val spotWithUser = spot.copy(userId = authManager.currentUserId)
 

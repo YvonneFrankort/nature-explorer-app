@@ -37,8 +37,16 @@ fun NatureSpotItem(spot: NatureSpot) {
     ) {
         val context = LocalContext.current
 
-        // Decide what to load: local file first, then Firebase URL
-        val data = spot.imageLocalPath?.let { File(it) } ?: spot.imageFirebaseUrl
+        val data = when {
+            spot.imageLocalPath != null && File(spot.imageLocalPath).exists() ->
+                File(spot.imageLocalPath)
+
+            !spot.imageFirebaseUrl.isNullOrBlank() ->
+                spot.imageFirebaseUrl
+
+            else -> null
+        }
+
 
         val request = ImageRequest.Builder(context)
             .data(data)

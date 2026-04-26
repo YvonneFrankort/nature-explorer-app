@@ -51,7 +51,6 @@ fun DiscoveryTimelineCard(
         ) {
             Row(Modifier.padding(16.dp)) {
 
-                // ⭐ Category dot moved left of the image
                 CategoryDot(color = getCategoryColor(spot.plantLabel ?: ""))
                 Spacer(Modifier.width(12.dp))
 

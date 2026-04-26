@@ -24,15 +24,30 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.naturegame.viewmodel.CameraViewModel
+import androidx.navigation.NavController
+import com.example.naturegame.data.remote.firebase.AuthManager
+import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun CameraScreen(
+    navController: NavController,
+    authManager: AuthManager,
     cameraViewModel: CameraViewModel
-) {
+)
+{
+    if (!authManager.isSignedIn) {
+        LaunchedEffect(Unit) {
+            navController.navigate("login") {
+                popUpTo("camera") { inclusive = true }
+            }
+        }
+        return
+    }
+
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    // Start GPS tracking when entering the screen, via ViewModel's injected LocationManager
+
     LaunchedEffect(Unit) {
         cameraViewModel.locationManager.startTracking()
     }
@@ -42,7 +57,6 @@ fun CameraScreen(
     val capturedImagePath by viewModel.capturedImagePath.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
-    // CameraX components
     val previewView = remember { PreviewView(context) }
     val imageCapture = remember {
         ImageCapture.Builder()
@@ -50,7 +64,6 @@ fun CameraScreen(
             .build()
     }
 
-    // Permission handling
     var hasPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
@@ -85,7 +98,6 @@ fun CameraScreen(
         return
     }
 
-    // Bind camera AFTER previewView exists
     LaunchedEffect(previewView, hasPermission) {
         if (!hasPermission) return@LaunchedEffect
 

@@ -27,44 +27,53 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.naturegame.viewmodel.ProfileViewModel
 import com.example.naturegame.viewmodel.WalkViewModel
+import androidx.navigation.NavController
+import com.example.naturegame.data.remote.firebase.AuthManager
+import androidx.compose.runtime.LaunchedEffect
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(
+    navController: NavController,
+    authManager: AuthManager
+) {
+
+    if (!authManager.isSignedIn) {
+        LaunchedEffect(Unit) {
+            navController.navigate("login") {
+                popUpTo("profile") { inclusive = true }
+            }
+        }
+        return
+    }
 
     val viewModel: ProfileViewModel = hiltViewModel()
     val walkViewModel: WalkViewModel = hiltViewModel()
 
-// Profile data
     val name by viewModel.profileName.collectAsState()
     val pictureUri by viewModel.profilePictureUri.collectAsState()
     val useMiles by viewModel.useMiles.collectAsState()
 
-// ⭐ Lifetime totals (Activity section)
     val totalSteps by viewModel.totalSteps.collectAsState()
     val totalDistanceMeters by viewModel.totalDistance.collectAsState()
     val findings by viewModel.findingsCount.collectAsState()
 
     val steps = totalSteps
 
-// ⭐ Current session (Badges)
     val currentSession by walkViewModel.currentSession.collectAsState()
     val sessionSteps = currentSession?.stepCount ?: 0
     val sessionDistance = currentSession?.distanceMeters ?: 0f
 
-// ⭐ Badges use session values
     val badges = listOf(
         ProfileViewModel.Badge("walker", "Walker", sessionSteps >= 1000),
         ProfileViewModel.Badge("explorer", "Explorer", findings >= 5),
         ProfileViewModel.Badge("tracker", "Tracker", sessionDistance >= 1000f)
     )
 
-// ⭐ Activity distance formatting (lifetime totals)
     val distanceKm = totalDistanceMeters / 1000f
     val displayDistance =
         if (useMiles) String.format("%.2f mi", distanceKm * 0.621371)
         else String.format("%.2f km", distanceKm)
 
-    // Dialog state
     var showNameDialog by remember { mutableStateOf(false) }
     var newName by remember { mutableStateOf(name) }
 
@@ -90,7 +99,7 @@ fun ProfileScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF7F7F7))   // ⭐ New background
+            .background(Color(0xFFF7F7F7))
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -111,7 +120,6 @@ fun ProfileScreen() {
                 ),
             contentAlignment = Alignment.Center
         ) {
-
             Box(
                 modifier = Modifier
                     .size(140.dp)
@@ -140,7 +148,6 @@ fun ProfileScreen() {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Name row
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.clickable {
@@ -162,7 +169,6 @@ fun ProfileScreen() {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // 🌿 Activity header
         SectionHeader(icon = Icons.Default.Insights, title = "Your Activity")
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -182,7 +188,6 @@ fun ProfileScreen() {
         Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
         Spacer(modifier = Modifier.height(32.dp))
 
-        // 🌿 Badges header
         SectionHeader(icon = Icons.Default.EmojiEvents, title = "Badges")
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -219,11 +224,14 @@ fun ProfileScreen() {
         SettingsRow("Change units") { viewModel.toggleUnits() }
         SettingsRow("Reset progress") { showResetDialog = true }
         SettingsRow("About") { showAboutDialog = true }
+        SettingsRow("Logout") {
+            authManager.signOut()
+            navController.navigate("login") {
+                popUpTo("profile") { inclusive = true }
+            }
+        }
     }
 
-    // -----------------------------
-    // Dialogs
-    // -----------------------------
 
     if (showNameDialog) {
         AlertDialog(
@@ -288,6 +296,7 @@ fun ProfileScreen() {
         )
     }
 }
+
 
 @Composable
 fun SectionHeader(icon: ImageVector, title: String) {

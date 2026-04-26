@@ -24,7 +24,6 @@ class StepCounterManager(context: Context) {
     private var stepListener: SensorEventListener? = null
     private var gyroListener: SensorEventListener? = null
 
-    // Shake detection
     private var lastShakeTime = 0L
     private val SHAKE_THRESHOLD = 5.0f
     private val SHAKE_COOLDOWN = 1000L

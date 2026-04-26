@@ -28,7 +28,6 @@ fun CapturedImageView(
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
 
-        // --- IMAGE ---
         AsyncImage(
             model = File(imagePath),
             contentDescription = "Captured photo",
@@ -39,12 +38,10 @@ fun CapturedImageView(
                 .background(Color.Black)
         )
 
-        // --- CLASSIFICATION CARD ---
         if (classificationResult != null) {
             ClassificationResultCard(result = classificationResult)
         }
 
-        // --- NOTE FIELD ---
         TextField(
             value = note,
             onValueChange = onNoteChange,
@@ -54,7 +51,6 @@ fun CapturedImageView(
                 .padding(horizontal = 16.dp)
         )
 
-// --- NOTE ACTIONS ---
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -66,7 +62,6 @@ fun CapturedImageView(
             }
         }
 
-        // --- RETAKE / SAVE SPOT ---
         Row(
             modifier = Modifier
                 .fillMaxWidth()

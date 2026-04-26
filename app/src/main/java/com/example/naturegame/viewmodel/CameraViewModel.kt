@@ -45,9 +45,6 @@ class CameraViewModel @Inject constructor(
 
     var currentNote = MutableStateFlow("")
 
-    // -----------------------------
-    //  Take photo + classify
-    // -----------------------------
     fun takePhotoAndClassify(context: Context, imageCapture: ImageCapture) {
         _isLoading.value = true
 
@@ -72,9 +69,6 @@ class CameraViewModel @Inject constructor(
         }
     }
 
-    // -----------------------------
-    //  Suspend photo capture
-    // -----------------------------
     private suspend fun takePhotoSuspend(
         context: Context,
         imageCapture: ImageCapture
@@ -107,9 +101,6 @@ class CameraViewModel @Inject constructor(
         currentNote.value = ""
     }
 
-    // -----------------------------
-    //  Save spot with ML result
-    // -----------------------------
     fun saveCurrentSpot(context: Context) {
         val imagePath = _capturedImagePath.value ?: return
 
@@ -118,7 +109,6 @@ class CameraViewModel @Inject constructor(
 
             val result = _classificationResult.value
 
-            // Get the latest location from LocationManager
             val loc = locationManager.currentLocation.value
             val lat = loc?.latitude ?: 0.0
             val lon = loc?.longitude ?: 0.0

@@ -18,9 +18,6 @@ class ProfileViewModel @Inject constructor(
     private val walkRepository: WalkRepository,
 ) : ViewModel() {
 
-    // -----------------------------
-    // USER AUTH
-    // -----------------------------
     private val _currentUser = MutableStateFlow<FirebaseUser?>(authManager.currentUser)
     val currentUser: StateFlow<FirebaseUser?> = _currentUser
 
@@ -38,9 +35,6 @@ class ProfileViewModel @Inject constructor(
         _currentUser.value = null
     }
 
-    // -----------------------------
-    // PROFILE DATA
-    // -----------------------------
     val profileName: StateFlow<String> =
         repository.profileName.stateIn(
             viewModelScope,
@@ -63,9 +57,6 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch { repository.updatePicture(uri) }
     }
 
-    // -----------------------------
-    // WALKING DATA
-    // -----------------------------
     val totalSteps = walkRepository.getAllSessions()
         .map { sessions -> sessions.sumOf { it.stepCount } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
@@ -81,9 +72,6 @@ class ProfileViewModel @Inject constructor(
             0
         )
 
-    // -----------------------------
-    // SETTINGS: UNIT SWITCHING
-    // -----------------------------
     private val _useMiles = MutableStateFlow(false)
     val useMiles: StateFlow<Boolean> = _useMiles
 
@@ -91,9 +79,6 @@ class ProfileViewModel @Inject constructor(
         _useMiles.value = !_useMiles.value
     }
 
-    // -----------------------------
-    // BADGES
-    // -----------------------------
     data class Badge(
         val id: String,
         val label: String,
@@ -113,10 +98,6 @@ class ProfileViewModel @Inject constructor(
             emptyList()
         )
 
-
-    // -----------------------------
-    // RESET PROGRESS
-    // -----------------------------
     fun resetAll() {
         viewModelScope.launch {
             // Reset DataStore values

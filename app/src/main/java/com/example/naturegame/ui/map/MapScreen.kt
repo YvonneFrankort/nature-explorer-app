@@ -1,13 +1,11 @@
 package com.example.naturegame.ui.map
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.naturegame.data.local.entity.NatureSpot
 import com.example.naturegame.utils.getCategoryColorHex
 import com.example.naturegame.utils.getTintedDefaultMarker
@@ -22,16 +20,43 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
+import androidx.navigation.NavController
+import com.example.naturegame.data.remote.firebase.AuthManager
+import androidx.compose.runtime.collectAsState
+import com.example.naturegame.ui.utils.LocalActivity
 
 @Composable
 fun MapScreen(
+    navController: NavController,
+    authManager: AuthManager,
     lat: Double? = null,
     lng: Double? = null,
     mapViewModel: MapViewModel = hiltViewModel(),
     walkViewModel: WalkViewModel = hiltViewModel(),
     profileViewModel: ProfileViewModel = hiltViewModel()
-)
- {
+) {
+    // --- LOGIN GUARD ---
+    if (!authManager.isSignedIn) {
+        LaunchedEffect(Unit) {
+            navController.navigate("login") {
+                popUpTo("map") { inclusive = true }
+            }
+        }
+        return
+    }
+
+    val activity = LocalActivity.current
+
+    DisposableEffect(Unit) {
+        activity?.requestedOrientation =
+            android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
+        onDispose {
+            activity?.requestedOrientation =
+                android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        }
+    }
+
     val context = LocalContext.current
 
     LocationAndActivityPermissions(onAllGranted = {})
@@ -52,7 +77,6 @@ fun MapScreen(
 
     val defaultPosition = GeoPoint(65.0121, 25.4651)
 
-    // OSMDroid config
     DisposableEffect(Unit) {
         Configuration.getInstance().load(
             context,
@@ -62,7 +86,7 @@ fun MapScreen(
         onDispose {}
     }
 
-    // ⭐ Delay MapView creation by one frame (fixes SIGKILL)
+    // Delay MapView creation by one frame to eliminate SIGKILL
     var ready by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { ready = true }
 
@@ -73,7 +97,6 @@ fun MapScreen(
             var selectedSpot by remember { mutableStateOf<NatureSpot?>(null) }
             var followUser by remember { mutableStateOf(true) }
 
-            // Polyline remembered
             val polyline = remember {
                 Polyline().apply {
                     outlinePaint.color = 0xFF2E7D32.toInt()
@@ -102,10 +125,8 @@ fun MapScreen(
                     },
                     update = { map ->
 
-                        // Update polyline
                         polyline.setPoints(routePoints)
 
-                        // Rebuild markers
                         map.overlays.removeAll { it is Marker }
                         natureSpots.forEach { spot ->
                             val marker = Marker(map).apply {
@@ -130,14 +151,12 @@ fun MapScreen(
                             map.overlays.add(marker)
                         }
 
-                        // Follow user
                         currentLocation?.let { loc ->
                             if (followUser) {
                                 map.controller.animateTo(GeoPoint(loc.latitude, loc.longitude))
                             }
                         }
 
-                        // ⭐ Jump to spot if opened from Timeline
                         if (lat != null && lng != null) {
                             followUser = false
                             map.controller.setZoom(17.0)

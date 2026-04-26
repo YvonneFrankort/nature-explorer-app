@@ -18,15 +18,31 @@ import com.example.naturegame.data.local.entity.WalkSession
 import com.example.naturegame.utils.groupSpotsByDate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.android.awaitFrame
+import androidx.navigation.NavController
+import com.example.naturegame.data.remote.firebase.AuthManager
+import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun TimelineScreen(
-    walks: List<WalkSession>,          // unused for now
+    navController: NavController,
+    authManager: AuthManager,
+    walks: List<WalkSession>,
     spots: List<NatureSpot>,
     onDiscoveryClick: (NatureSpot) -> Unit = {},
     onWalkClick: (WalkSession) -> Unit = {},
     onMapClick: (NatureSpot) -> Unit = {}
-) {
+)
+{
+
+    if (!authManager.isSignedIn) {
+        LaunchedEffect(Unit) {
+            navController.navigate("login") {
+                popUpTo("timeline") { inclusive = true }
+            }
+        }
+        return
+    }
+
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
 
@@ -34,7 +50,6 @@ fun TimelineScreen(
         groupSpotsByDate(spots)
     }
 
-    // Show FAB only when scrolled down
     val showScrollToTop by remember {
         derivedStateOf { listState.firstVisibleItemIndex > 0 }
     }
@@ -74,7 +89,6 @@ fun TimelineScreen(
             }
         }
 
-        // ⭐ Scroll-to-top FAB
         if (showScrollToTop) {
             FloatingActionButton(
                 onClick = {

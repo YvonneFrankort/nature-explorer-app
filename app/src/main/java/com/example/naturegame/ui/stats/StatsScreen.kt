@@ -16,19 +16,32 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.Alignment
-import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
+import androidx.navigation.NavController
+import com.example.naturegame.data.remote.firebase.AuthManager
+import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun StatsScreen(
+    navController: NavController,
+    authManager: AuthManager,
     statsViewModel: StatsViewModel
-) {
-    val sessions by statsViewModel.sessions.collectAsStateWithLifecycle()
+)
+ {
+     if (!authManager.isSignedIn) {
+         LaunchedEffect(Unit) {
+             navController.navigate("login") {
+                 popUpTo("stats") { inclusive = true }
+             }
+         }
+         return
+     }
+
+     val sessions by statsViewModel.sessions.collectAsStateWithLifecycle()
     val totalSteps by statsViewModel.totalSteps.collectAsStateWithLifecycle()
     val totalDistance by statsViewModel.totalDistance.collectAsStateWithLifecycle()
     val totalWalks by statsViewModel.totalWalks.collectAsStateWithLifecycle()
 
-    // ⭐ Longest walk
     val longestWalk = sessions.maxByOrNull { it.distanceMeters }
 
     Column(

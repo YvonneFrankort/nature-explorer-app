@@ -23,7 +23,7 @@ fun NatureSpotPopup(
     spot: NatureSpot,
     onDismiss: () -> Unit
 ) {
-    // Dimmed background
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -46,7 +46,6 @@ fun NatureSpotPopup(
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
 
-                // Category color stripe
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -61,7 +60,6 @@ fun NatureSpotPopup(
                         )
                 )
 
-                // Image (local or remote)
                 val localFile = spot.imageLocalPath?.let { File(it) }
                 val imageModel =
                     if (localFile != null && localFile.exists()) localFile
@@ -79,20 +77,17 @@ fun NatureSpotPopup(
                     )
                 }
 
-                // Title
                 Text(
-                    text = spot.plantLabel ?: spot.name,
+                    text = spot.plantLabel ?: spot.name ?: "Unknown",
                     style = MaterialTheme.typography.titleLarge
                 )
 
-                // Date
                 Text(
                     text = spot.timestamp.toFormattedDate(),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                // Note
                 spot.note?.takeIf { it.isNotBlank() }?.let { note ->
                     Text(
                         text = note,
@@ -105,7 +100,6 @@ fun NatureSpotPopup(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Close button
                 Button(
                     onClick = onDismiss,
                     modifier = Modifier.align(Alignment.End)
