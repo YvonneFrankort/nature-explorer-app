@@ -1,46 +1,113 @@
-# 🌿 Nature Game Mobile
+# 🌿 Nature Explorer - Android App
 
-A solo Android course project focused on building a feature-rich mobile application 
-using modern Android development tools and APIs.
+Nature Explorer is a feature-rich Android application built with Kotlin and Jetpack Compose that helps users track walks, capture discoveries, and explore nature through maps, timelines, and personal progress statistics. The app integrates sensors, GPS, camera, ML classification, and cloud services and authentication into one cohesive experience.
+
+Originally started during coursework and later expanded into an independent portfolio project with new features and UI improvements.
 
 ---
 
 ## 📱 Overview
 
-Nature Game is an Android application build in Android Studio with Jetpack Compose, Google Maps, and Room. 
-The app encourages users to explore nature by tracking walks and record their 
-observations such as plants, animals, and other natural objects.
+Nature Game is an Android application built in Android Studio with Jetpack Compose, Google Maps, and Room. 
+Nature Explorer encourages users to explore the outdoors by tracking walks, capturing photos, identifying plants, and saving discoveries.
 
-The app combines multiple mobile technologies:
+The app combines:
 
 - Sensors (step counter)
 - GPS tracking and mapping
-- Camera and image capture
+- CameraX image capture
 - On-device machine learning (ML Kit)
-- Cloud integration (Firebase)
+- Firebase Authentication, Firestore & Storage
+- Local persistence with Room
+- Modern UI with Jetpack Compose + Material 3
 
-Users can track their walks, capture photos, identify species, and store observations locally or in the cloud
+Users can log in, track their walks, capture and classify nature photos, save discoveries, and view them on a map, in a list, or in a timeline.
 
 --- 
 
-## ✨ Features
-### Core Features
-- 👟 Step tracking using device sensors
-- 🗺️ GPS route tracking with map visualization
-- 📷 Photo capture using CameraX
-- 🌿 Plant recognition using ML Kit
-- 💾 Local storage with Room database
-- ☁️ Cloud-ready architecture (Firebase)
-- 👌 Playstore signing <br>
+## 🛠️ Tech Stack
 
-### Additional Features (Implemented)
-- ✅ Full Firebase integration (Auth, Firestore, Storage)
-- 📍 Observations displayed as markers on the map
-- 📝 Custom user comments on observations
-- 🧠 Multi-category ML recognition (plants, animals, landscape etc.)
-- 👤 User profile with stats (steps, distance, discoveries)
+### Languages & Frameworks
+- Kotlin
+- Jetpack Compose
+- Material 3
+
+### Architecture
+- MVVM
+- Repository Pattern
+- StateFlow
+- Hilt Dependency Injection
+
+### Data & Backend
+- Room Database
+- Firebase Authentication
+- Firestore
+- Firebase Storage
+
+### Device & APIs
+- Google Maps Compose
+- Fused Location Provider
+- CameraX
+- ML Kit Image Classification
+- Step Counter Sensor
 
 ---
+
+## ✨ Features
+
+### Firebase Authentication
+- Firebase login / register
+- Secure logout
+- Password reset flow
+- protected screens
+
+### 🗺️ Walk Tracking
+- Real-time GPS route tracking
+- Distance measurement
+- Step counter integration
+- Pause / Resume walk sessions
+- Walk history and statistics saved to Room
+
+### 📸 Discoveries & Memories
+- Save discoveries with image, category, notes, and location
+- Timeline screen showing discoveries in chronological order
+- One-click jump from timeline to map location
+- Category-based discovery list with color-coded cards
+
+📷 Camera + ML Classification
+- CameraX capture
+- Loading indicator
+- On‑device plant classifier
+- Confidence scores & top labels
+- Add notes before saving
+
+### 👤 User Profile
+- Personal statistics dashboard
+- Longest walk tracking
+- Achievement badges
+- Activity overview
+- Logout
+
+### 💾 Data & Storage
+- Room database for local persistence
+- Firebase-ready cloud architecture
+
+
+---
+
+## 📸 Screenshots
+
+| Map Screen | Camera Screen |
+|------------|---------------|
+| <img src="IMAGE_LINK_1" width="260"> | <img src="IMAGE_LINK_2" width="260"> |
+
+| Discoveries | Timeline |
+|-------------|----------|
+| <img src="IMAGE_LINK_3" width="260"> | <img src="IMAGE_LINK_4" width="260"> |
+
+| Statistics | Profile |
+|------------|---------|
+| <img src="IMAGE_LINK_5" width="260"> | <img src="IMAGE_LINK_6" width="260"> |
 
 ## 🗺️ Screenshot
 **Map Screen**<br>
@@ -64,6 +131,8 @@ Users can track their walks, capture photos, identify species, and store observa
 **Profile Screen**<br>
 <img width="300" alt="Profile_Screen" src="https://github.com/user-attachments/assets/4191295e-69c2-4bcb-a2cb-2d2776eb4a37" />
 
+**Timeline Screen**<br>
+
 ---
 
 ## Demo video
@@ -83,43 +152,35 @@ The app follows modern Android architecture principles:
 - Repository pattern  
 - Google Maps Compose  
 - CameraX
+- Firebase Auth, Firestore, Storage
 
 ---
 ## 🧭 Navigation Structure
 
+- **LoginScreen** - authentication
+- **RegisterScreen** - account creation
 - **MapScreen** — main map with markers  
-- **CameraScreen** — take photos  
-- **ProfileScreen** — user stats  
-- **WalkHistoryScreen** — list of walks  
-- **WalkStatsCard** — summary of walking activity  
+- **CameraScreen** — capture & classify photos
+- **ExploreScreen** - list of discoveries
+- **TimelineScreen** - chronological feed
+- **StatsScreen** - walk statistics 
+- **ProfileScreen** —  user info & logout  
 
 ---
 
-## 🏃 Walk Tracking
-
-- Uses fused location provider  
-- Tracks distance in real time  
-- Saves sessions to Room  
-- Displays history and stats  
-
----
 ## 📚 Learning Outcomes
 
 This project demonstrates:
 
-- Practical Android development with modern tools
-- Integration of hardware sensors and system services
-- Use of on-device machine learning
-- Cloud-connected mobile architecture
-- Full app lifecycle from development to release
+- Modern Android development with Compose
+- Integration of sensors, GPS, and camera
+- On‑device ML classification
+- Firebase‑connected architecture
+- Clean code, UI polish, and app lifecycle management
+- Turning a course project into a portfolio‑ready app
 
 ---
-## 🔗 Course Materials
-
-Course content: https://www.villemajava.com
-
---- 
 ## 👩‍💻 Author
 
-**Yvonne Frankort**  
-OAMK — Mobile App Development, Spring 2026
+Yvonne Frankort  
+Originally developed for the Mobile App Development course at OAMK (Spring 2026), and extended with additional features and improvements.
