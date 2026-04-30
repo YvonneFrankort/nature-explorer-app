@@ -97,18 +97,22 @@ Users can log in, track their walks, capture and classify nature photos, save di
 
 ## 📸 Screenshots
 
+### Map & Camera
 | Map Screen | Camera Screen |
 |------------|---------------|
 | <img width="260" alt="Map_Screen" src="https://github.com/user-attachments/assets/bd0e307d-9992-4019-8aa1-df576bb69ed7" />  | <img width="260" alt="Camera_Screen" src="https://github.com/user-attachments/assets/9e42438a-993d-48a5-b12f-7930d20e9414" />
 
+### Discoveries & Timeline
 | Discoveries | Timeline |
 |-------------|----------|
 | <img width="260" alt="Discovery_Screen" src="https://github.com/user-attachments/assets/3b760ba4-5472-4f8d-a397-c0c750b975ae" /> | <img width="260" alt="Timeline_Screen" src="https://github.com/user-attachments/assets/0701801a-ca15-418f-9a07-37e2de3a0cce" />|
 
+### Stats & Profile
 | Statistics | Profile |
 |------------|---------|
 | <img width="260" alt="Stats_Screen" src="https://github.com/user-attachments/assets/126a718c-f6f4-47ed-b612-49e917bd8604" /> | <img width="260" alt="Profile_Screen" src="https://github.com/user-attachments/assets/99ae57b9-e408-43e0-a4ec-56196e910054" /> |
 
+### Login & Map Marker
 | Login | Marker |
 |-------------|----------|
 | <img width="260" alt="Login" src="https://github.com/user-attachments/assets/e9686e39-7c18-4c1f-858e-666f90e6f544" /> | <img width="260" alt="Marker" src="https://github.com/user-attachments/assets/badc175d-2e82-4731-947a-67f85521d078" /> |
