@@ -99,44 +99,25 @@ Users can log in, track their walks, capture and classify nature photos, save di
 
 | Map Screen | Camera Screen |
 |------------|---------------|
-| <img src="IMAGE_LINK_1" width="260"> | <img src="IMAGE_LINK_2" width="260"> |
+| <img width="260" alt="Map_Screen" src="https://github.com/user-attachments/assets/bd0e307d-9992-4019-8aa1-df576bb69ed7" />  | <img width="260" alt="Camera_Screen" src="https://github.com/user-attachments/assets/9e42438a-993d-48a5-b12f-7930d20e9414" />
 
 | Discoveries | Timeline |
 |-------------|----------|
-| <img src="IMAGE_LINK_3" width="260"> | <img src="IMAGE_LINK_4" width="260"> |
+| <img width="260" alt="Discovery_Screen" src="https://github.com/user-attachments/assets/3b760ba4-5472-4f8d-a397-c0c750b975ae" /> | <img width="260" alt="Timeline_Screen" src="https://github.com/user-attachments/assets/0701801a-ca15-418f-9a07-37e2de3a0cce" />|
 
 | Statistics | Profile |
 |------------|---------|
-| <img src="IMAGE_LINK_5" width="260"> | <img src="IMAGE_LINK_6" width="260"> |
+| <img width="260" alt="Stats_Screen" src="https://github.com/user-attachments/assets/126a718c-f6f4-47ed-b612-49e917bd8604" /> | <img width="260" alt="Profile_Screen" src="https://github.com/user-attachments/assets/99ae57b9-e408-43e0-a4ec-56196e910054" /> |
 
-## 🗺️ Screenshot
-**Map Screen**<br>
-<img width="300" alt="Map_Screen" src="https://github.com/user-attachments/assets/467829fc-2843-49cb-b737-d0a940c01017" />
-
-**Marker and Polyline**<br>
-<img width="300" alt="Marker_And_Polyline" src="https://github.com/user-attachments/assets/7a81d728-14bd-447b-a9ae-003c638fca04" />
-
-**Marker Note**<br>
-<img width="300" alt="Marker_Note" src="https://github.com/user-attachments/assets/e972ffd8-98ee-4414-a428-c2a49af192f8" />
-
-**Camera Screen**<br>
-<img width="300" alt="Camera_Screen" src="https://github.com/user-attachments/assets/076dd4e4-e491-4986-b730-662c2c7e69ab" />
-
-**Discover Screen**<br>
-<img width="300" alt="Discovery_Screen" src="https://github.com/user-attachments/assets/6389f9d0-7c1c-43c0-8a05-2b3eb3a6998b" />
-
-**Stats Screen**<br>
-<img width="300" alt="Stats_Screen" src="https://github.com/user-attachments/assets/2eaf1f14-843e-4609-a57e-3b2f6977a9ef" />
-
-**Profile Screen**<br>
-<img width="300" alt="Profile_Screen" src="https://github.com/user-attachments/assets/4191295e-69c2-4bcb-a2cb-2d2776eb4a37" />
-
-**Timeline Screen**<br>
+| Login | Marker |
+|-------------|----------|
+| <img width="260" alt="Login" src="https://github.com/user-attachments/assets/e9686e39-7c18-4c1f-858e-666f90e6f544" /> | <img width="260" alt="Marker" src="https://github.com/user-attachments/assets/badc175d-2e82-4731-947a-67f85521d078" /> |
 
 ---
 
 ## Demo video
-https://github.com/user-attachments/assets/bef877bc-01cd-4c04-b2e7-ed2f85aa3d40
+
+https://github.com/user-attachments/assets/4183ae9f-daf1-4784-88f8-1396120fc090
 
 ---
 
