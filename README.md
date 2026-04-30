@@ -92,6 +92,11 @@ Users can log in, track their walks, capture and classify nature photos, save di
 - Room database for local persistence
 - Firebase-ready cloud architecture
 
+---
+
+## Demo video
+
+https://github.com/user-attachments/assets/4183ae9f-daf1-4784-88f8-1396120fc090
 
 ---
 
@@ -116,12 +121,6 @@ Users can log in, track their walks, capture and classify nature photos, save di
 | Login | Marker |
 |-------------|----------|
 | <img width="260" alt="Login" src="https://github.com/user-attachments/assets/e9686e39-7c18-4c1f-858e-666f90e6f544" /> | <img width="260" alt="Marker" src="https://github.com/user-attachments/assets/badc175d-2e82-4731-947a-67f85521d078" /> |
-
----
-
-## Demo video
-
-https://github.com/user-attachments/assets/4183ae9f-daf1-4784-88f8-1396120fc090
 
 ---
 
